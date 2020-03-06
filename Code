@@ -1,0 +1,315 @@
+Imports System.IO
+Module Module1
+    Dim snakeSize As String
+    Dim snakeSpeed As Integer
+    Dim x(2000), y(2000) As Integer
+    Dim applex As Integer = 2 * (Int(Rnd() * 80) + 1)
+    Dim appley As Integer = 2 * (Int(Rnd() * 18) + 1)
+    Dim input As ConsoleKeyInfo
+    Dim keyID As Integer
+    Dim length As Integer = 0
+    Dim Filename As String = "highscore.txt"
+    'WHAT TO ADD ------> A HIGHSCORE SAVED TO BINARY FILE - (WITH PLAYER NAME) - A WHOLE SETTINGS PAGE TO ENTER ALLL YOUR SETTINGS THAT GET SAVED - MORE CUSTOMISATION AND CHECK FOOD PLACEMENT
+
+
+    Sub exists()
+
+    End Sub
+    Sub Main()
+
+
+
+        Randomize()
+        Dim input As String
+        Dim Finsihed As Boolean = False
+        Console.CursorVisible = False
+        Dim menuChoice As ConsoleKeyInfo
+        Console.SetWindowSize(180, 40)
+
+        Do
+
+            Console.WriteLine("Welcome to Snake")
+            Console.WriteLine("1. Play Game")
+            Console.WriteLine("2. Chooose Settings")
+            Console.WriteLine("3. View Highscore")
+
+            Do
+                applex = 2 * (Int(Rnd() * 80) + 1)
+                appley = 2 * (Int(Rnd() * 18) + 1)
+                menuChoice = Console.ReadKey()
+                If menuChoice.Key = 49 Then
+                    Console.Clear()
+                    Finsihed = True
+                    snakeSize = "██"
+                    snakeSpeed = 50
+                    length = 0
+                    MoveSnake()
+                ElseIf menuChoice.Key = 50 Then
+                    Finsihed = True
+
+                    Console.Clear()
+                    Console.WriteLine("Do you want a Big or Small snake?")
+                    input = Console.ReadLine()
+                    Select Case LCase(input)
+                        Case "big"
+                            snakeSize = "██"
+                        Case "small"
+                            snakeSize = "■"
+                        Case Else
+                            snakeSize = "██"
+                    End Select
+                    Console.WriteLine("Enter Your speed (1 - 10)")
+                    input = Console.ReadLine()
+                    Select Case input
+                        Case 1
+                            snakeSpeed = 170
+                        Case 2
+                            snakeSpeed = 150
+                        Case 3
+                            snakeSpeed = 130
+                        Case 4
+                            snakeSpeed = 120
+                        Case 5
+                            snakeSpeed = 110
+                        Case 6
+                            snakeSpeed = 90
+                        Case 7
+                            snakeSpeed = 70
+                        Case 8
+                            snakeSpeed = 50
+                        Case 9
+                            snakeSpeed = 30
+                        Case 10
+                            snakeSpeed = 10
+                        Case Else
+                            snakeSpeed = 30
+                    End Select
+                    Console.Clear()
+
+                ElseIf menuChoice.Key = 51 Then
+                    ViewLeaderboard()
+                    Finsihed = False
+
+                ElseIf menuChoice.Key = 52 Then
+                    Finsihed = True
+                Else
+                    Finsihed = False
+                End If
+            Loop Until Finsihed = True
+            length = 0
+            MoveSnake()
+            For d = 0 To 2000
+                x(d) = 0
+                y(d) = 0
+            Next
+        Loop Until 1 = 2
+
+    End Sub
+
+    Sub MoveSnake()
+        keyID = 0
+        x(0) = 90
+        y(0) = 20
+
+        Console.SetCursorPosition(applex, appley)
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.WriteLine(snakeSize)
+        Console.ResetColor()
+
+
+        Do
+
+            For u = length To 1 Step -1
+                y(u) = y(u - 1)
+                x(u) = x(u - 1)
+            Next
+
+
+            Select Case MoveDirection()
+                Case 1 ' This is UP
+                    y(0) -= 1
+                Case 2 ' This is Right
+                    x(0) -= 2
+                Case 3 ' This is Down
+                    y(0) += 1
+                Case 4 ' This is Left
+                    x(0) += 2
+                Case 0
+
+            End Select
+
+            For l = 0 To length
+                Try
+                    Console.SetCursorPosition(x(l), y(l)) 'X(0) and y(0) will always be the head
+                Catch ex As System.ArgumentOutOfRangeException
+                    GameOver()
+                End Try
+                Console.ForegroundColor = ConsoleColor.Green
+                Console.WriteLine(snakeSize)
+            Next
+            System.Threading.Thread.Sleep(snakeSpeed) ' This will control the speed of the character
+
+            Console.SetCursorPosition(x(length), y(length))
+            Console.Write("  ")
+            CheckCollision()
+
+
+            If x(0) = applex And y(0) = appley Then
+                PlaceFood()
+            Else
+
+            End If
+            ' need to make whatever is after the head = to the head previously then the one after that equal to what that was previously -
+            ' then you go to the one that is at length and erase the end one
+
+
+        Loop Until 1 = 2
+
+
+    End Sub
+
+    Sub GameOver()
+        Console.Clear()
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.SetCursorPosition(30, 10)
+        Console.WriteLine("                                   
+  ______    ______   __       __  ________   ______   __     __  ________  _______  
+ /      \  /      \ |  \     /  \|        \ /      \ |  \   |  \|        \|       \ 
+|  $$$$$$\|  $$$$$$\| $$\   /  $$| $$$$$$$$|  $$$$$$\| $$   | $$| $$$$$$$$| $$$$$$$\
+| $$ __\$$| $$__| $$| $$$\ /  $$$| $$__    | $$  | $$| $$   | $$| $$__    | $$__| $$
+| $$|    \| $$    $$| $$$$\  $$$$| $$  \   | $$  | $$ \$$\ /  $$| $$  \   | $$    $$
+| $$ \$$$$| $$$$$$$$| $$\$$ $$ $$| $$$$$   | $$  | $$  \$$\  $$ | $$$$$   | $$$$$$$\
+| $$__| $$| $$  | $$| $$ \$$$| $$| $$_____ | $$__/ $$   \$$ $$  | $$_____ | $$  | $$
+ \$$    $$| $$  | $$| $$  \$ | $$| $$     \ \$$    $$    \$$$   | $$     \| $$  | $$
+  \$$$$$$  \$$   \$$ \$$      \$$ \$$$$$$$$  \$$$$$$      \$     \$$$$$$$$ \$$   \$$")
+
+        Console.ReadKey()
+        Console.ResetColor()
+        Console.Clear()
+
+        Using reader As StreamReader = New StreamReader(Filename)
+            Highscore = reader.Read()
+        End Using
+
+        If length > Highscore Then
+            Console.WriteLine($"You got a new highscore of {length}!!!")
+            SaveScore()
+            'ADD A HIGHSCORE SECTION HERE TO WRITE TO A BINARY FILE AND DISPLAY IT IN ORDER. ------> LEADERBOARD <------
+        Else
+            Console.WriteLine("Press any key to return to the main menu...")
+        End If
+
+        Console.ResetColor()
+        Console.ReadKey()
+        Console.Clear()
+        Main()
+    End Sub
+    Dim username As String
+
+    Sub SaveScore()
+        Console.WriteLine("Please Enter your name")
+        username = Console.ReadLine()
+        Dim table As String
+        Filename = "highscore.txt"
+        Using reader As StreamReader = New StreamReader(Filename)
+            table = File.ReadAllText(Filename)
+        End Using
+
+        Using writer As StreamWriter = New StreamWriter(Filename, False)
+            writer.Write(length)
+            writer.WriteLine(" : " & username)
+        End Using
+        Using writer As StreamWriter = New StreamWriter(Filename, True)
+            writer.WriteLine(table)
+        End Using
+    End Sub
+
+    Dim Highscore As String
+
+    Sub ViewLeaderboard()
+        Dim table As String
+
+        Using reader As StreamReader = New StreamReader(Filename)
+            table = File.ReadAllText(Filename)
+        End Using
+
+        Console.Clear()
+        Console.WriteLine("The Table:")
+        Console.Write(table)
+
+        Console.ReadKey()
+    End Sub
+
+    Sub CheckCollision()
+        For i = 1 To length
+            If x(0) = x(i) And y(0) = y(i) Then
+                GameOver()
+            End If
+        Next
+
+        If x(0) = 0 Or y(0) = 0 Or y(0) = Console.WindowHeight Then
+            GameOver()
+        End If
+    End Sub
+
+    Sub PlaceFood()
+        Console.SetCursorPosition(applex, appley)
+        Console.WriteLine("  ")
+        Dim done As Boolean = False
+
+
+        appley = (Int(Rnd() * Console.WindowHeight))
+        applex = 2 * (Int(Rnd() * (Console.WindowWidth / 2)))
+
+
+
+        Console.SetCursorPosition(applex, appley)
+        Console.ForegroundColor = ConsoleColor.Red
+        Console.WriteLine(snakeSize)
+
+
+        length = length + 5 ' This will control how big you get when you eat some food
+        Console.SetCursorPosition((Console.WindowWidth / 2) - 12, 0)
+        Console.ForegroundColor = ConsoleColor.Green
+        Console.WriteLine($"Length: {length}")
+        Console.ResetColor()
+
+    End Sub
+
+    Function MoveDirection() As Integer
+
+        If Console.KeyAvailable Then
+            Console.ForegroundColor = ConsoleColor.Black
+            input = Console.ReadKey()
+            Console.ResetColor()
+
+            If LCase(input.KeyChar) = "w" Or input.Key = 38 Then
+                keyID = 1
+                Return 1
+            ElseIf LCase(input.KeyChar) = "a" Or input.Key = 37 Then
+                keyID = 2
+                Return 2
+            ElseIf LCase(input.KeyChar) = "s" Or input.Key = 40 Then
+                keyID = 3
+                Return 3
+            ElseIf LCase(input.KeyChar) = "d" Or input.Key = 39 Then
+                keyID = 4
+                Return 4
+            End If
+        Else
+            If keyID = 1 Then
+                Return 1
+            ElseIf keyID = 2 Then
+                Return 2
+            ElseIf keyID = 3 Then
+                Return 3
+            ElseIf keyID = 4 Then
+                Return 4
+            End If
+        End If
+
+    End Function
+
+End Module
+
+
